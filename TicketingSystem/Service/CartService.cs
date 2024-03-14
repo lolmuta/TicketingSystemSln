@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using System.Data;
 using TicketingSystem.Models;
 using TicketingSystem.Utils;
 
@@ -93,6 +94,20 @@ namespace TicketingSystem.Service
                     return "刪除異常";
                 }
             });
+        }
+
+        internal string PostPaid(string userId)
+        {
+            var storedProcedureName = "usp_PostPaid";
+            var values = new { userId };
+
+            var 預存執行是否有誤 = dbHelper.ConnDb(conn => conn.QueryFirst<string>(storedProcedureName, values, commandType: CommandType.StoredProcedure));
+            if (!string.IsNullOrWhiteSpace(預存執行是否有誤))
+            {
+                return 預存執行是否有誤;
+            }
+
+            return "";
         }
 
         internal IEnumerable<CartInfo> GetCartList(string userId)

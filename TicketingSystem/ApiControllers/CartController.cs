@@ -66,14 +66,27 @@ namespace TicketingSystem.ApiControllers
                 return Ok(new { success = false, message = result });
             }
         }
+        [HttpPost("postPaid")]
+        public IActionResult PostPaid()
+        {
+            string token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            var userId = jwtService.GetUserIdFromToken(token);
+            string result = cartService.PostPaid(userId);
+            if (string.IsNullOrWhiteSpace(result))
+            {
+                return Ok(new { success = true });
+            }
+            else
+            {
+                return Ok(new { success = false, message = result });
+            }
+        }
     }
 
     public class DeleteCart
     {
         public int id { get; set; }
     }
-
-    //data = await apiGet("cart", "getCartList", { });
 
     public class TempCartModel
     {

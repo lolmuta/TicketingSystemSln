@@ -84,6 +84,7 @@
         <button type="button" onclick="結帳();">結帳</button>
     </div>
 </div>
+
 @section Scripts {
     <script>
         var pageArr = [];
@@ -245,6 +246,18 @@
         }
         async function 結帳(){
             alert("結帳");
+            const data = await postPaid();
+            if (!data.success) {
+                alert(data.message);
+                return;
+            }
+
+            alert("結帳成功");
+        }
+        async function postPaid(){
+            let data = {};
+            data = await apiPost("cart", "postPaid", {});
+            return data;
         }
     </script>
 }
