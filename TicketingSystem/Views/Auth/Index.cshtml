@@ -1,0 +1,136 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = null;
+}
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/TicketingSystem.styles.css" asp-append-version="true" />
+<div id="登入頁面">
+    <div>登入頁面</div>
+    <div>
+
+        使用者帳號<input type="text" id="userId" />
+    </div>
+    <div>
+        使用者密碼<input type="password" id="userPwd" />
+    </div>
+    <div>
+        <button type="button" onclick="登入();">登入</button>
+        <button type="button" onclick="取消();">取消</button>
+        <button type="button" onclick="建立新帳號頁面();">建立新帳號頁面</button>
+    </div>
+</div>
+<div id="建立新帳號頁面" class="d-none">
+    <div>
+        建立新帳號頁面
+    </div>
+    <div>
+        新使用者帳號<input type="text" id="新使用者帳號" />
+
+    </div>
+    <div>
+        新使用者姓名<input type="text" id="新使用者姓名" />
+
+    </div>
+    <div>
+        新使用者密碼1<input type="text" id="新使用者密碼1" />
+        @*新使用者密碼2<input type="text" id="新使用者密碼2" />*@
+    </div>
+    <div>
+        <button type="button" onclick="建立新的帳號();">建立新的帳號</button>
+        <button type="button" onclick="返回登入頁面();">返回登入頁面</button>
+    </div>
+</div>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/lib/axios.min.js" asp-append-version="true"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+<script>
+    window.websettings = window.websettings || {}; // 确保对象已经存在
+    window.websettings.host = '@(Context.Request.Scheme)://@(Context.Request.Host)';
+
+</script>
+<script>
+    const pageArr = [];
+    pageArr.push($("#登入頁面"));
+    pageArr.push($("#建立新帳號頁面"));
+
+    const $userId = $("#userId");
+    const $userPwd = $("#userPwd");
+    async function 登入() {
+        const userId = $userId.val();
+        const userPwd = $userPwd.val();
+        try {
+            let url = `${window.websettings.host}/api/auth/login`;
+            const response = await axios.post(url, {
+                userId: userId,
+                userPwd: userPwd
+            });
+            // 從回應中獲取令牌
+            const token = response.data.token;
+            // 將令牌存儲在本地存儲中
+            window.sessionStorage.setItem("token", token);
+            window.websettings.token = token;
+            console.log('登入成功，已存儲令牌到本地存儲');
+            debugger;
+            到首頁();
+        } catch (error) {
+            console.error('登入失敗:', error);
+            // 可以添加錯誤處理邏輯
+        }
+    }
+    function 到首頁() {
+        window.location.href = `${window.websettings.host}/home/index`;
+    }
+    async function 取消() {
+        $userId.val("");
+        $userPwd.val("");
+    }
+    async function 建立新帳號頁面() {
+        goPanelId("#建立新帳號頁面");
+        $("#新使用者帳號").val("");
+        $("#新使用者姓名").val("");
+        $("#新使用者密碼1").val("");
+    }
+    async function 返回登入頁面() {
+        goPanelId("#登入頁面");
+        $userId.val("");
+        $userPwd.val("");
+    }
+    function goPanelId(id) {
+        for (let i = 0; i < pageArr.length;i++){
+            if(!pageArr[i].hasClass("d-none")){
+                pageArr[i].addClass("d-none");
+            }
+        }
+        $(id).removeClass("d-none");
+    }
+    async function 建立新的帳號() {
+        const userId = $("#新使用者帳號").val();
+        const userName = $("#新使用者姓名").val();
+        const userPwd1 = $("#新使用者密碼1").val();
+
+        try {
+            let url = `${window.websettings.host}/api/auth/createAccount`;
+            const response = await axios.post(url, {
+                userId: userId,
+                userName: userName,
+                userPwd: userPwd1,
+            });
+            const data = response.data;
+            if (data.success) {
+                alert("建立成功");
+                返回登入頁面();
+                return;
+            }
+            alert(data.message);
+            // 將令牌存儲在本地存儲中
+
+        } catch (error) {
+            console.error('建立失敗:', error);
+            // 可以添加錯誤處理邏輯
+        }
+    }
+</script>

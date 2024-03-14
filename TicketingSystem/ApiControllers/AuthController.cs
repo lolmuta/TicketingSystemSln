@@ -5,6 +5,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using TicketingSystem.LoginUtil;
+using TicketingSystem.Models;
+using TicketingSystem.Repo;
 
 namespace TicketingSystem.ApiControllers
 {
@@ -13,10 +15,12 @@ namespace TicketingSystem.ApiControllers
     public class AuthController : ControllerBase
     {
         private readonly JwtService jwtService;
+        private readonly UsersService usersService;
 
-        public AuthController(JwtService jwtService)
+        public AuthController(JwtService jwtService, UsersService usersService)
         {
             this.jwtService = jwtService;
+            this.usersService = usersService;
         }
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginModel model)
@@ -24,23 +28,75 @@ namespace TicketingSystem.ApiControllers
             // 從 model 中獲取用戶名和密碼
             string userId = model.userId;
             string userPwd = model.userPwd;
-
+            bool isValid = usersService.ValidUser(userId, userPwd);
+            if (!isValid)
+            {
+                return BadRequest("驗證錯誤");
+            }
             var token = jwtService.GenerateJwtToken(userId);
             return Ok(new { token });
         }
-        [HttpGet("getUsernameFromToken")]
-        public IActionResult GetUsernameFromToken()
+        [HttpGet("checkLogin")]
+        public IActionResult CheckLogin()
         {
-            string token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-            var userId = jwtService.GetUserIdFromToken(token);
-            return Ok(new { userId });
-        }
+            try
+            {
+                string token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+                var userId = jwtService.GetUserIdFromToken(token);
+                if(userId == null)
+                {
+                    return Ok(new { success = false, message = "未登入" });
+                }
 
+                return Ok(new { success = true, message = "登入" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("GetUserInfo 錯誤" + ex.Message);
+            }
+        }
+        [HttpGet("getUserInfo")]
+        public IActionResult GetUserInfo()
+        {
+            try
+            {
+                string token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+                var userId = jwtService.GetUserIdFromToken(token);
+                UserInfo userInfo = usersService.GetUserInfo(userId);
+                return Ok(new { success = true, message = userInfo });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("GetUserInfo 錯誤" + ex.Message);
+            }
+        }
+        [HttpPost("createAccount")]
+        public IActionResult CreateAccount([FromBody] CreateUserModel model)
+        {
+            string userId = model.userId;
+            string userName = model.userName;
+            string pwd = model.userPwd;
+            string error = usersService.CreateUser(userId, userName, pwd);
+            if (!string.IsNullOrWhiteSpace(error))
+            {
+                return Ok(new { success = false, message = error });
+            }
+
+            return Ok(new { success = true });
+        }
+    }
+
+    public class CreateUserModel
+    {
+
+        public string userName { get; set; }
+        public string userPwd { get; set; }
+        public string userId { get; set; }
     }
 
     public class LoginModel
     {
-        public string userId { get; internal set; }
-        public string userPwd { get; internal set; }
+        public string userId { get;  set; }
+        public string userPwd { get; set; }
     }
 }

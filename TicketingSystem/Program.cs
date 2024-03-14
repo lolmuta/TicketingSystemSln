@@ -2,10 +2,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TicketingSystem.LoginUtil;
+using TicketingSystem.Repo;
+using TicketingSystem.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<DbHelper>();
+builder.Services.AddScoped<UsersService>();
 //¹ê§@jwt µn¤J
 //todo appsetting
 string _secretKey = "yourSecretKeyaaaaaaaaaaaaaaaaaaaaaaa";

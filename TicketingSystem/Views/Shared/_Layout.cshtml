@@ -27,6 +27,9 @@
                         </li>
                     </ul>
                 </div>
+                <div id="userInfo">
+                   abc
+                </div>
             </div>
         </nav>
     </header>
@@ -46,5 +49,67 @@
     <script src="~/lib/axios.min.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        window.websettings = window.websettings || {}; // 确保对象已经存在
+        window.websettings.host = '@(Context.Request.Scheme)://@(Context.Request.Host)';
+        window.websettings.token = window.sessionStorage.getItem("token");
+        window.websettings.userInfo = {}
+        /**
+         * 檢查是否登入
+         */
+        async function checkLogin(){
+            try {
+                const token = window.websettings.token;
+                const url = `${window.websettings.host}/api/auth/checkLogin`;
+                  
+                const response = await axios.get(url, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    },
+                    params: {
+                    }
+                });
+
+                const data = response.data;
+                if(!data.success){
+                    alert(data.message);
+                    返回登入頁面();
+                    return false;
+                }
+                return true;
+            } catch (e) {
+                alert(e);
+                返回登入頁面();
+                return false;
+            }
+        }
+        function 返回登入頁面() {
+            const url = `${window.websettings.host}/auth/index`;
+            window.location.href = url;
+        }
+        $(document).ready(async function() {
+            if (!(await checkLogin())) return;
+
+            const token = window.websettings.token;
+            const url = `${window.websettings.host}/api/auth/getUserInfo`;
+            const response = await axios.get(url, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    },
+                    params: {
+                    }
+                });
+            const data = response.data;
+            if(!data.success){
+                alert(data.message);
+                返回登入頁面();
+                return;
+            }
+            debugger;
+            window.websettings.userInfo = data.message;
+            $("#userInfo").text(window.websettings.userInfo.name);
+        });
+    </script>
+
 </body>
 </html>
