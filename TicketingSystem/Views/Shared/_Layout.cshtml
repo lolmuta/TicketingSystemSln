@@ -18,17 +18,14 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
+                    <ul class="navbar-nav flex-grow-1" id="btnLink">
+ @*                       <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+                        </li>*@
                     </ul>
                 </div>
                 <div id="userInfo">
-                   abc
+                    [登入者資訊]
                 </div>
             </div>
         </nav>
@@ -57,11 +54,11 @@
         /**
          * 檢查是否登入
          */
-        async function checkLogin(){
+        async function checkLogin() {
             try {
                 const token = window.websettings.token;
                 const url = `${window.websettings.host}/api/auth/checkLogin`;
-                  
+
                 const response = await axios.get(url, {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -71,7 +68,7 @@
                 });
 
                 const data = response.data;
-                if(!data.success){
+                if (!data.success) {
                     alert(data.message);
                     返回登入頁面();
                     return false;
@@ -93,14 +90,14 @@
             const token = window.websettings.token;
             const url = `${window.websettings.host}/api/auth/getUserInfo`;
             const response = await axios.get(url, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    },
-                    params: {
-                    }
-                });
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                params: {
+                }
+            });
             const data = response.data;
-            if(!data.success){
+            if (!data.success) {
                 alert(data.message);
                 返回登入頁面();
                 return;
@@ -109,6 +106,67 @@
             window.websettings.userInfo = data.message;
             $("#userInfo").text(window.websettings.userInfo.name);
         });
+        /**
+         * 通用 apiGet
+         */
+        async function apiGet(apiControllerName, apiControllerFunctionName, para) {
+            const token = window.websettings.token;
+            const url = `${window.websettings.host}/api/${apiControllerName}/${apiControllerFunctionName}`;
+            const response = await axios.get(url, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                params: para
+            });
+            const data = response.data;
+            return data;
+        }
+        /**
+         * 通用 apiPost
+         */
+        async function apiPost(apiControllerName, apiControllerFunctionName, para) {
+            const token = window.websettings.token;
+            const url = `${window.websettings.host}/api/${apiControllerName}/${apiControllerFunctionName}`;
+            const response = await axios.post(url, para, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            const data = response.data;
+            return data;
+        }
+        /**
+         * 通用填入下拉選單
+         */
+        function ddlIn(selectId, optionsArray, addEmptyOption) {
+            var $select = $(selectId);
+
+            $select.empty();
+            // 如果需要添加空白選項，則先添加它
+            if (addEmptyOption) {
+                $select.append($('<option>', {
+                    value: '',
+                    text: ''
+                }));
+            }
+
+            // 遍歷 optionsArray 並將每個選項加入下拉選單
+            $.each(optionsArray, function(index, option) {
+                $select.append($('<option>', {
+                    value: option.value,
+                    text: option.text
+                }));
+            });
+        }
+        function addLink(btnText, functionName) {
+            const $btnLink = $("#btnLink");
+            const $newLink = $(`
+                        <li class="nav-item">
+                            <button type = "button" class = "btn btn-light" onclick="${functionName}">${btnText}</button>
+                        </li>
+                    `);
+            $btnLink.append($newLink);
+        }
     </script>
 
 </body>

@@ -2,7 +2,249 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
+@*<div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>*@
+<style>
+    .sub-title{
+        color: blue;
+    }
+</style>
+<div id="actList">
+    <div>
+        <table class="table" id="gv">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col" class="d-none"></th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Date and number of vailable tickets</th>
+                </tr>
+            </thead>
+            <tbody id="gvBody">
+            </tbody>
+        </table>
+    </div>
+    <div>
+        <button type="button" onclick="查詢活動();">查詢活動</button>
+        <button type="button" onclick="查詢購物車();">查詢購物車</button>
+    </div>
 </div>
+<div id="actDetail" class="d-none">
+    <div>
+        <label class="sub-title">Title</label>
+        <div id="actDetailTitle"></div>
+    </div>
+    <div>
+        <label>Description</label>
+        <div id="actDetailDescription"></div>
+    </div>
+    <div>
+        <label class="sub-title">date</label>
+        <select id="selDates" onchange="selDatesSelectChange();">
+        </select>
+    </div>
+    <div>
+        <label class="sub-title">number of vailable tickets</label>
+        <div id="actDetailCount"></div>
+    </div>
+    <div>
+        <label class="sub-title">已購買數量</label>
+        <div id="actDetailCurByCount"></div>
+    </div>
+    <div>
+        <label class="sub-title">buy tickets</label>
+        <input type="number" id="actDetailInputBuyNumber" />
+    </div>
+    <div>
+        <button type="button" onclick="加入購物車();">加入購物車</button>
+    </div>
+</div>
+<div id="cart" class="d-none">
+    <div>
+        <table class="table" id="gvCart">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col" class="d-none"></th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">number of vailable tickets</th>
+                </tr>
+            </thead>
+            <tbody id="gvCartBody">
+            </tbody>
+        </table>
+    </div>
+    <div>
+        <button type="button" onclick="查詢購物車();">查詢購物車</button>
+        <button type="button" onclick="結帳();">結帳</button>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        var pageArr = [];
+        pageArr.push($("#actList"));
+        pageArr.push($("#actDetail"));
+        pageArr.push($("#cart"));
+
+        function goPanelId(id) {
+            for (let i = 0; i < pageArr.length; i++) {
+                if (!pageArr[i].hasClass("d-none")) {
+                    pageArr[i].addClass("d-none");
+                }
+            }
+            $(id).removeClass("d-none");
+        }
+        $(document).ready(async function() {
+            goPanelId("#actList");
+            await 查詢活動();
+            addLink("查詢活動", "查詢活動();");
+            addLink("查詢購物車", "查詢購物車();");
+        });
+
+    </script>
+    <!--actList-->
+    <script>
+        async function 查詢活動() {
+            goPanelId("#actList");
+            const datas = await getActList();
+            const $gvBody = $("#gvBody");
+            $gvBody.empty();
+            datas.forEach(function(item) {
+                const dates = item.dates.replace(/,/g, '<br>');
+                const id = item.id;
+                const $tr = $(`
+                            <tr onclick="fillDetail(${id});">
+                            <th scope="col" class="rowNumber">${item.rowNumber}</th>
+                            <th scope="col" class="id d-none">${id}</th>
+                            <td class="title">${item.title}</th>
+                            <th class="description">${item.description}</th>
+                            <th class="dates">${dates}</th>
+                            </tr>
+                        `);
+                $gvBody.append($tr);
+            });
+        }
+        async function getActList() {
+            let data = [];
+            data = await apiGet("act", "getActList", {});
+            return data;
+        }
+
+    </script>
+    <!--actDetail-->
+    <script>
+        async function fillDetail(id) {
+            goPanelId("#actDetail");
+            let data = await getActDetail(id);
+            $("#actDetailTitle").text(data.title);
+            $("#actDetailDescription").text(data.description);
+
+            const ddlData = await getDDlActDates(id);
+            ddlIn("#selDates", ddlData, true);
+        }
+        async function getActDetail(id) {
+            let data = {};
+            data = await apiGet("act", "getActDetail", { id: id });
+            return data;
+        }
+        async function getDDlActDates(id) {
+            let data = [];
+            data = await apiGet("act", "getDDlActDates", { id: id });
+            return data;
+        }
+        async function selDatesSelectChange(){
+            const id = $("#selDates").val();
+            const count = await getTicketCount(id);
+            $("#actDetailCount").text(count);
+
+            const curBuyCount = await getCurBuyCount(id);
+             $("#actDetailCurByCount").text(curBuyCount);
+        }
+        async function getTicketCount(id) {
+            let data;
+            data = await apiGet("act", "getTicketCount", { id: id });
+            return data;
+        }
+
+        async function 加入購物車() {
+            const count = $("#actDetailInputBuyNumber").val();
+            const id = $("#selDates").val();
+            if(!id){
+                alert("請選擇日期");
+                return;
+            }
+            const addResult = await postAddToTempCart(id, count);
+            if (!addResult.success) {
+                alert(addResult.message);
+                return;
+            }
+            await 查詢活動();
+        }
+        async function postAddToTempCart(id, count) {
+            let data = {};
+            data = await apiPost("cart", "postAddToTempCart", { id: id, count: count });
+            return data;
+        }
+        async function getCurBuyCount(id){
+            let data;
+            data = await apiGet("cart", "getCurBuyCount", { id: id});
+            return data;
+        }
+    </script>
+    <!--cart-->
+    <script>
+        async function 查詢購物車() {
+            goPanelId("#cart");
+            const $gvBody = $("#gvCartBody");
+            const datas = await getCartList();
+            $gvBody.empty();
+            datas.forEach(function(item) {
+                const id = item.id;
+                const $tr = $(`
+                            <tr onclick="">
+                                <td class="operation">
+                                    <button type='button' class="btn btn-danger" onclick="delCart(${id})">刪除</button>
+                                </td>
+                                <td scope="col" class="id d-none">${id}</td>
+                                <td class="title">${item.title}</td>
+                                <td class="description">${item.description}</td>
+                                <td class="date">${item.date}</td>
+                                <td class="count">${item.count}</td>
+                            </tr>
+                        `);
+                $gvBody.append($tr);
+            });
+        }
+        async function getCartList() {
+            let data = [];
+            data = await apiGet("cart", "getCartList", {});
+            return data;
+        }
+        async function delCart(id) {
+            if (!confirm("確定刪除?")) {
+                return;
+            }
+            const data = await postDeleteCart(id);
+            if (!data.success) {
+                alert(data.message);
+                return;
+            }
+
+            alert("delete 成功");
+            await 查詢購物車();
+        }
+        async function postDeleteCart(id) {
+            let data = {};
+            data = await apiPost("cart", "postDeleteCart", {id:id});
+            return data;
+        }
+        async function 結帳(){
+            alert("結帳");
+        }
+    </script>
+}
