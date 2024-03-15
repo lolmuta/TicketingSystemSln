@@ -22,21 +22,40 @@ namespace TicketingSystem.ApiControllers
             this.actService = actService;
             this.jwtService = jwtService;
         }
+        /// <summary>
+        /// 取得所有活動列表
+        /// </summary>
+        /// <returns>活動列表</returns>
         [HttpGet("getActList")]
-        public IEnumerable<ActInfo> GetProductList()
+        public IEnumerable<ActInfo> GetActList()
         {
-            return actService.GetProductList();
+            return actService.GetActList();
         }
+        /// <summary>
+        /// 取得活動明細
+        /// </summary>
+        /// <param name="id">活動代號</param>
+        /// <returns>活動明細</returns>
         [HttpGet("getActDetail")]
         public ActDetail GetActDetail(int id)
         {
             return actService.GetActDetail(id);
         }
+        /// <summary>
+        /// 取得指定活動的時刻的下拉
+        /// </summary>
+        /// <param name="id">活動代號</param>
+        /// <returns></returns>
         [HttpGet("getDDlActDates")]
         public IEnumerable<SelectListItem> GetDDlActDates(int id)
         {
             return actService.GetDDlActDates(id);
         }
+        /// <summary>
+        /// 取得指定活動的庫存票數
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("getTicketCount")]
         public int GetTicketCount(int id)
         {

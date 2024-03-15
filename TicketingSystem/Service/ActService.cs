@@ -104,7 +104,7 @@ namespace TicketingSystem.Repo
             });
         }
 
-        internal IEnumerable<ActInfo> GetProductList()
+        internal IEnumerable<ActInfo> GetActList()
         {
             return dbHelper.ConnDb(conn =>
             {

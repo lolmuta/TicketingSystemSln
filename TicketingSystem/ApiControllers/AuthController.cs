@@ -24,6 +24,12 @@ namespace TicketingSystem.ApiControllers
             this.jwtService = jwtService;
             this.usersService = usersService;
         }
+        /// <summary>
+        /// 使用者登入，
+        /// 若登入成功會傳回 jwt token
+        /// </summary>
+        /// <param name="model">使用者輸入的帳密</param>
+        /// <returns></returns>
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginModel model)
         {
@@ -39,6 +45,10 @@ namespace TicketingSystem.ApiControllers
             var token = jwtService.GenerateJwtToken(userId);
             return Ok(new { token });
         }
+        /// <summary>
+        /// 檢查是否登入
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("checkLogin")]
         public IActionResult CheckLogin()
         {
@@ -58,6 +68,10 @@ namespace TicketingSystem.ApiControllers
                 return BadRequest("GetUserInfo 錯誤" + ex.Message);
             }
         }
+        /// <summary>
+        /// 取得使用者資訊
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("getUserInfo")]
         public IActionResult GetUserInfo()
         {
@@ -73,6 +87,11 @@ namespace TicketingSystem.ApiControllers
                 return BadRequest("GetUserInfo 錯誤" + ex.Message);
             }
         }
+        /// <summary>
+        /// 建立新帳號
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost("createAccount")]
         public IActionResult CreateAccount([FromBody] CreateUserModel model)
         {

@@ -36,6 +36,11 @@ namespace TicketingSystem.ApiControllers
             this.usersService = usersService;
             this.paidsService = paidsService;
         }
+        /// <summary>
+        /// 將購票加入購物車
+        /// </summary>
+        /// <param name="model">購票資訊</param>
+        /// <returns></returns>
         [HttpPost("postAddToTempCart")]
         public IActionResult PostAddToTempCart([FromBody] TempCartModel model)
         {
@@ -51,6 +56,10 @@ namespace TicketingSystem.ApiControllers
                 return Ok(new { success = false, message = result });
             }
         }
+        /// <summary>
+        /// 取得購物車的商品列表
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("getCartList")]
         public IEnumerable<CartInfo> GetCartList()
         {
@@ -58,6 +67,11 @@ namespace TicketingSystem.ApiControllers
             var userId = jwtService.GetUserIdFromToken(token);
             return cartService.GetCartList(userId);
         }
+        /// <summary>
+        /// 取得使用者購物庫內的指定活動的票數
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("getCurBuyCount")]
         public int GetCurBuyCount(int id)
         {
@@ -65,6 +79,11 @@ namespace TicketingSystem.ApiControllers
             var userId = jwtService.GetUserIdFromToken(token);
             return cartService.GetCurBuyCount(id, userId);
         }
+        /// <summary>
+        /// 刪除購物車內指定活的的所有票數
+        /// </summary>
+        /// <param name="deleteCart"></param>
+        /// <returns></returns>
         [HttpPost("postDeleteCart")]
         public IActionResult PostDeleteCart([FromBody] DeleteCart deleteCart)
         {
@@ -80,6 +99,10 @@ namespace TicketingSystem.ApiControllers
                 return Ok(new { success = false, message = result });
             }
         }
+        /// <summary>
+        /// 將購物車的的所有商品付款
+        /// </summary>
+        /// <returns></returns>
         [HttpPost("postPaid")]
         public IActionResult PostPaid()
         {
