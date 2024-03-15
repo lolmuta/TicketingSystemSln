@@ -53,8 +53,6 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-
-
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -64,8 +62,8 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1",
-        Title = "ToDo API",
-        Description = "An ASP.NET Core Web API for managing ToDo items",
+        Title = "潦布╰参api",
+        Description = "潦布╰参api弧",
         TermsOfService = new Uri("https://example.com/terms"),
         Contact = new OpenApiContact
         {
@@ -79,9 +77,6 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 
-    // using System.Reflection;
-
-    //var xmlFilename = $"{System.AppDomain.CurrentDomain.BaseDirectory}/bin/api-doc.xml";
     var assemblyPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
     var xmlFilePath = Path.Combine(Path.GetDirectoryName(assemblyPath), "..", "..", "api-doc.xml");
     options.IncludeXmlComments(xmlFilePath);
