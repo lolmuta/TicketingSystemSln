@@ -51,7 +51,7 @@
         <div id="actDetailCount"></div>
     </div>
     <div>
-        <label class="sub-title">已購買數量</label>
+        <label class="sub-title">您的購物車已有數量</label>
         <div id="actDetailCurByCount"></div>
     </div>
     <div>
@@ -147,6 +147,7 @@
 
             const ddlData = await getDDlActDates(id);
             ddlIn("#selDates", ddlData, true);
+            $("#actDetailInputBuyNumber").val("");
         }
         async function getActDetail(id) {
             let data = {};
@@ -160,13 +161,20 @@
         }
         async function selDatesSelectChange(){
             const id = $("#selDates").val();
+            //if(!id){
+            //    $("#actDetailCount").val("");
+            //    $("#actDetailCurByCount").val("");
+            //    return;
+            //}
             const count = await getTicketCount(id);
             $("#actDetailCount").text(count);
 
             const curBuyCount = await getCurBuyCount(id);
-             $("#actDetailCurByCount").text(curBuyCount);
+            $("#actDetailCurByCount").text(curBuyCount);
         }
         async function getTicketCount(id) {
+            if (!id) return "";
+
             let data;
             data = await apiGet("act", "getTicketCount", { id: id });
             return data;
@@ -184,6 +192,7 @@
                 alert(addResult.message);
                 return;
             }
+            alert("成功加入購物車");
             await 查詢活動();
         }
         async function postAddToTempCart(id, count) {
@@ -192,6 +201,8 @@
             return data;
         }
         async function getCurBuyCount(id){
+            if (!id) return "";
+
             let data;
             data = await apiGet("cart", "getCurBuyCount", { id: id});
             return data;
@@ -252,7 +263,7 @@
                 return;
             }
 
-            alert("結帳成功");
+            alert("結帳成功，已將購買票卷寄到您的信箱");
         }
         async function postPaid(){
             let data = {};

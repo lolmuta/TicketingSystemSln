@@ -107,7 +107,7 @@ namespace TicketingSystem.Service
                             commandType: CommandType.StoredProcedure);
             });
             bool 預存執行是否有誤 = spResult.success < 0;
-            if (!預存執行是否有誤)
+            if (預存執行是否有誤)
             {
                 return spResult.message;
             }

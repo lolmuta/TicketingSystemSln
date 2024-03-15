@@ -16,7 +16,7 @@ builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<TicketsUUIDService>();
 builder.Services.AddScoped<PaidsService>();
 builder.Services.AddScoped<EmailHelper>();
-
+builder.Services.AddScoped<QRCoderHelper>();
 //¹ê§@jwt µn¤J
 var configuration = builder.Configuration;
 string SecretKey = configuration.GetValue<string>("JwtAuth:SecretKey");
