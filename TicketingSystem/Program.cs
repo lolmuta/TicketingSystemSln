@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
+using Serilog.Events;
 using System.Text;
 using TicketingSystem.LoginUtil;
 using TicketingSystem.Repo;
@@ -7,6 +9,11 @@ using TicketingSystem.Service;
 using TicketingSystem.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//serilog
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
 
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<DbHelper>();
@@ -17,6 +24,7 @@ builder.Services.AddScoped<TicketsUUIDService>();
 builder.Services.AddScoped<PaidsService>();
 builder.Services.AddScoped<EmailHelper>();
 builder.Services.AddScoped<QRCoderHelper>();
+
 //¹ê§@jwt µn¤J
 var configuration = builder.Configuration;
 string SecretKey = configuration.GetValue<string>("JwtAuth:SecretKey");
@@ -48,6 +56,9 @@ builder.Services.AddAuthentication(options =>
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+//serilog
+builder.Host.UseSerilog();
 
 var app = builder.Build();
 

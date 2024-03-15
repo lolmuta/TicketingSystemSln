@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -17,7 +18,8 @@ namespace TicketingSystem.ApiControllers
         private readonly JwtService jwtService;
         private readonly UsersService usersService;
 
-        public AuthController(JwtService jwtService, UsersService usersService)
+        public AuthController(JwtService jwtService, UsersService usersService
+           )
         {
             this.jwtService = jwtService;
             this.usersService = usersService;
@@ -25,6 +27,7 @@ namespace TicketingSystem.ApiControllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginModel model)
         {
+            Log.Information("call login");
             // 從 model 中獲取用戶名和密碼
             string userId = model.userId;
             string userPwd = model.userPwd;
