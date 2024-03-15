@@ -96,16 +96,23 @@ namespace TicketingSystem.Service
             });
         }
 
-        internal string PostPaid(string userId)
+        internal string PostPaid(string userId, out int Paids_Id)
         {
+            Paids_Id = -1;
             var storedProcedureName = "usp_PostPaid";
             var values = new { userId };
-
-            var 預存執行是否有誤 = dbHelper.ConnDb(conn => conn.QueryFirst<string>(storedProcedureName, values, commandType: CommandType.StoredProcedure));
-            if (!string.IsNullOrWhiteSpace(預存執行是否有誤))
+            SpResult spResult = dbHelper.ConnDb(conn =>
             {
-                return 預存執行是否有誤;
+                return conn.QueryFirst<SpResult>(storedProcedureName, values,
+                            commandType: CommandType.StoredProcedure);
+            });
+            bool 預存執行是否有誤 = spResult.success < 0;
+            if (!預存執行是否有誤)
+            {
+                return spResult.message;
             }
+
+            Paids_Id = int.Parse(spResult.message);
 
             return "";
         }

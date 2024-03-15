@@ -32,11 +32,12 @@
     </div>
     <div>
         新使用者姓名<input type="text" id="新使用者姓名" />
-
     </div>
     <div>
-        新使用者密碼1<input type="text" id="新使用者密碼1" />
-        @*新使用者密碼2<input type="text" id="新使用者密碼2" />*@
+        新使用者密碼<input type="password" id="新使用者密碼1" />
+    </div>
+    <div>
+        新使用者信箱<input type="email" id="新使用者信箱" />
     </div>
     <div>
         <button type="button" onclick="建立新的帳號();">建立新的帳號</button>
@@ -93,6 +94,7 @@
         $("#新使用者帳號").val("");
         $("#新使用者姓名").val("");
         $("#新使用者密碼1").val("");
+        $("#新使用者信箱").val("");
     }
     async function 返回登入頁面() {
         goPanelId("#登入頁面");
@@ -111,6 +113,7 @@
         const userId = $("#新使用者帳號").val();
         const userName = $("#新使用者姓名").val();
         const userPwd1 = $("#新使用者密碼1").val();
+        const userEmail = $("#新使用者信箱").val();
 
         try {
             let url = `${window.websettings.host}/api/auth/createAccount`;
@@ -118,6 +121,7 @@
                 userId: userId,
                 userName: userName,
                 userPwd: userPwd1,
+                userEmail:userEmail
             });
             const data = response.data;
             if (data.success) {

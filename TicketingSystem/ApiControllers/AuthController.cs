@@ -76,7 +76,8 @@ namespace TicketingSystem.ApiControllers
             string userId = model.userId;
             string userName = model.userName;
             string pwd = model.userPwd;
-            string error = usersService.CreateUser(userId, userName, pwd);
+            string email = model.userEmail;
+            string error = usersService.CreateUser(userId, userName, pwd, email);
             if (!string.IsNullOrWhiteSpace(error))
             {
                 return Ok(new { success = false, message = error });
@@ -92,6 +93,7 @@ namespace TicketingSystem.ApiControllers
         public string userName { get; set; }
         public string userPwd { get; set; }
         public string userId { get; set; }
+        public string userEmail { get; set; }
     }
 
     public class LoginModel

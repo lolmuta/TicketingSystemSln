@@ -21,7 +21,7 @@ namespace TicketingSystem.Repo
             });
         }
 
-        internal string CreateUser(string userId, string userName, string pwd)
+        internal string CreateUser(string userId, string userName, string pwd, string email)
         {
             var sql = @"select 1 from Users where Id = @userId";
             bool userExists = dbHelper.ConnDb(conn =>
@@ -36,18 +36,21 @@ namespace TicketingSystem.Repo
             INSERT INTO [dbo].[Users]
                    ([ID]
                    ,[Name]
-                   ,[Pwd])
+                   ,[Pwd]
+                   , Email)
              VALUES
                    (@userId
                    ,@userName
-                   ,@Pwd);";
+                   ,@Pwd
+                   ,@email );";
             bool insertSuccess = dbHelper.ConnDb(conn =>
             {
                 return conn.Execute(sql2, new
                 {
                     userId,
                     userName,
-                    pwd
+                    pwd,
+                    email
                 }) == 1;
             });
             if (!insertSuccess)
@@ -65,6 +68,7 @@ namespace TicketingSystem.Repo
                     select 
                         [ID]
                         ,[Name] 
+                        , Email
                     from Users where Id = @userId";
                 return conn.QueryFirst<UserInfo>(sql, new { userId });
             });

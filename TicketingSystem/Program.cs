@@ -13,13 +13,17 @@ builder.Services.AddScoped<DbHelper>();
 builder.Services.AddScoped<UsersService>();
 builder.Services.AddScoped<ActService>();
 builder.Services.AddScoped<CartService>();
+builder.Services.AddScoped<TicketsUUIDService>();
+builder.Services.AddScoped<PaidsService>();
+builder.Services.AddScoped<EmailHelper>();
 
 //實作jwt 登入
-//todo appsetting
-string _secretKey = "yourSecretKeyaaaaaaaaaaaaaaaaaaaaaaa";
-string issuer = "yourIssuer";
-string audience = "yourAudience";
-double expirationHours = 1;
+var configuration = builder.Configuration;
+string SecretKey = configuration.GetValue<string>("JwtAuth:SecretKey");
+string Issuer = configuration.GetValue<string>("JwtAuth:Issuer");
+string Audience = configuration.GetValue<string>("JwtAuth:Audience");
+double ExpirationHours = configuration.GetValue<double>("JwtAuth:ExpirationHours");
+
 // 添加身份驗證服務
 builder.Services.AddAuthentication(options =>
 {
@@ -34,9 +38,9 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = issuer,
-        ValidAudience = audience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey))
+        ValidIssuer = Issuer,
+        ValidAudience = Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SecretKey))
     };
 });
 
