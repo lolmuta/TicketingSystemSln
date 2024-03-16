@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using System.Data;
 using TicketingSystem.Models;
 using TicketingSystem.Utils;
 
@@ -40,5 +41,16 @@ namespace TicketingSystem.Repo
                 conn.Execute(sql, new { paids_Id });
             });
         }
+
+        internal IEnumerable<PaidsInfo> GetPaidsList(string userId)
+        {
+            return dbHelper.ConnDb(conn =>
+            {
+                var spName = "usp_GetPaidsList";
+                var values = new { userId };
+                return conn.Query<PaidsInfo>(spName, values, commandType: CommandType.StoredProcedure);
+            });
+        }
+
     }
 }

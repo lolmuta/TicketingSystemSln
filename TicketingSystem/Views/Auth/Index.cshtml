@@ -7,6 +7,10 @@
 <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/TicketingSystem.styles.css" asp-append-version="true" />
+<div id="loading" class="d-flex align-items-center d-none">
+    <strong>Loading...</strong>
+    <div class="spinner-border ml-auto" role="status" aria-hidden="true"></div>
+</div>
 <div id="登入頁面">
     <div>登入頁面</div>
     <div>
@@ -49,11 +53,29 @@
 <script src="~/lib/axios.min.js" asp-append-version="true"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
 <script>
+    function fn_showLoading(loadingElement, contentElement) {
+        $(loadingElement).removeClass('d-none');
+        $(contentElement).addClass('d-none');
+    }
+
+    // Function to hide loading indicator
+    function fn_hideLoading(loadingElement, contentElement) {
+        $(loadingElement).addClass('d-none');
+        $(contentElement).removeClass('d-none');
+    }
+</script>
+<script>
     window.websettings = window.websettings || {}; // 确保对象已经存在
     window.websettings.host = '@(Context.Request.Scheme)://@(Context.Request.Host)';
 
 </script>
 <script>
+    function showloading(panelId){
+        fn_showLoading("#loading", panelId)
+    }
+    function hideLoading(panelId){
+        fn_hideLoading("#loading" , panelId)
+    }
     const pageArr = [];
     pageArr.push($("#登入頁面"));
     pageArr.push($("#建立新帳號頁面"));
@@ -63,6 +85,7 @@
     async function 登入() {
         const userId = $userId.val();
         const userPwd = $userPwd.val();
+        showloading("#登入頁面");
         try {
             let url = `${window.websettings.host}/api/auth/login`;
             const response = await axios.post(url, {
@@ -75,11 +98,12 @@
             window.sessionStorage.setItem("token", token);
             window.websettings.token = token;
             console.log('登入成功，已存儲令牌到本地存儲');
-            debugger;
             到首頁();
         } catch (error) {
             console.error('登入失敗:', error);
             // 可以添加錯誤處理邏輯
+        } finally {
+            hideLoading("#登入頁面");
         }
     }
     function 到首頁() {

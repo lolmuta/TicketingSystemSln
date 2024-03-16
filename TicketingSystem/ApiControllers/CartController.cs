@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Serilog;
 using TicketingSystem.LoginUtil;
 using TicketingSystem.Models;
 using TicketingSystem.Repo;
@@ -119,15 +120,36 @@ namespace TicketingSystem.ApiControllers
                 var userInfo = usersService.GetUserInfo(userId);
                 MailInfo mailInfo = emailHelper.GetEmailBody(ticketsInfo, userInfo);
 
-                string sendResult = emailHelper.Send(mailInfo);
-
-                if (!string.IsNullOrWhiteSpace(sendResult))
+                Task task = Task.Run(() =>
                 {
-                    paidsService.UpdateSendMailStatusToTrue(Paids_Id);
-                    return Ok(new { success = false, message = sendResult });
-                }
+                    try
+                    {
+                        string sendResult = emailHelper.Send(mailInfo);
 
-                return Ok(new { success = true });
+                        if (!string.IsNullOrWhiteSpace(sendResult))
+                        {
+                            Log.Error("寄信錯誤1", sendResult);
+                        }
+                        else
+                        {
+                            paidsService.UpdateSendMailStatusToTrue(Paids_Id);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error("寄信錯誤2", ex);
+                    }
+                });
+
+                //string sendResult = emailHelper.Send(mailInfo);
+
+                //if (!string.IsNullOrWhiteSpace(sendResult))
+                //{
+                //    paidsService.UpdateSendMailStatusToTrue(Paids_Id);
+                //    return Ok(new { success = false, message = sendResult });
+                //}
+
+                return Ok(new { success = true, message = Paids_Id });
             }
             catch (Exception ex)
             {
@@ -135,7 +157,6 @@ namespace TicketingSystem.ApiControllers
             }
         }
     }
-
     public class DeleteCart
     {
         public int id { get; set; }

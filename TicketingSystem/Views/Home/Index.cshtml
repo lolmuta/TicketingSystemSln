@@ -11,6 +11,10 @@
         color: blue;
     }
 </style>
+<div id="loading" class="d-flex align-items-center d-none">
+    <strong>Loading...</strong>
+    <div class="spinner-border ml-auto" role="status" aria-hidden="true"></div>
+</div>
 <div id="actList" class="d-none">
     <div>
         <table class="table" id="gv">
@@ -67,7 +71,7 @@
         <table class="table" id="gvCart">
             <thead>
                 <tr>
-                    <th scope="col">#</th>
+                     <th scope="col">#</th>
                     <th scope="col" class="d-none"></th>
                     <th scope="col">Title</th>
                     <th scope="col">Description</th>
@@ -84,13 +88,37 @@
         <button type="button" onclick="結帳();">結帳</button>
     </div>
 </div>
-
+<!--todo 付款清單-->
+<div id="paids" class="d-none">
+    <div>
+        <table class="table" id="gvPaids">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col" class="d-none"></th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">number of vailable tickets</th>
+                    <th scope="col">paidDate</th>
+                    <th scope="col">isSendEmail</th>
+                </tr>
+            </thead>
+            <tbody id="gvPaidsBody">
+            </tbody>
+        </table>
+    </div>
+    <div>
+        <button type="button" onclick="查詢付款();">查詢付款</button>
+    </div>
+</div>
 @section Scripts {
     <script>
         var pageArr = [];
         pageArr.push($("#actList"));
         pageArr.push($("#actDetail"));
         pageArr.push($("#cart"));
+        pageArr.push($("#paids"));
 
         function goPanelId(id) {
             for (let i = 0; i < pageArr.length; i++) {
@@ -105,13 +133,32 @@
             await 查詢活動();
             addLink("查詢活動", "查詢活動();");
             addLink("查詢購物車", "查詢購物車();");
+            addLink("查詢付款", "查詢付款();");
         });
 
+        function fn_showLoading(loadingElement, contentElement) {
+            $(loadingElement).removeClass('d-none');
+            $(contentElement).addClass('d-none');
+        }
+
+        // Function to hide loading indicator
+        function fn_hideLoading(loadingElement, contentElement) {
+            $(loadingElement).addClass('d-none');
+            $(contentElement).removeClass('d-none');
+        }
+
+        function showloading(panelId){
+            fn_showLoading("#loading", panelId)
+        }
+        function hideLoading(panelId){
+            fn_hideLoading("#loading" , panelId)
+        }
     </script>
     <!--actList-->
     <script>
         async function 查詢活動() {
             goPanelId("#actList");
+            showloading("#actList")
             const datas = await getActList();
             const $gvBody = $("#gvBody");
             $gvBody.empty();
@@ -129,6 +176,7 @@
                         `);
                 $gvBody.append($tr);
             });
+            hideLoading("#actList")
         }
         async function getActList() {
             let data = [];
@@ -141,6 +189,7 @@
     <script>
         async function fillDetail(id) {
             goPanelId("#actDetail");
+            showloading("#actDetail")
             let data = await getActDetail(id);
             $("#actDetailTitle").text(data.title);
             $("#actDetailDescription").text(data.description);
@@ -148,6 +197,7 @@
             const ddlData = await getDDlActDates(id);
             ddlIn("#selDates", ddlData, true);
             $("#actDetailInputBuyNumber").val("");
+            hideLoading("#actDetail")
         }
         async function getActDetail(id) {
             let data = {};
@@ -161,16 +211,14 @@
         }
         async function selDatesSelectChange(){
             const id = $("#selDates").val();
-            //if(!id){
-            //    $("#actDetailCount").val("");
-            //    $("#actDetailCurByCount").val("");
-            //    return;
-            //}
+
+            showloading("#selDates")
             const count = await getTicketCount(id);
             $("#actDetailCount").text(count);
 
             const curBuyCount = await getCurBuyCount(id);
             $("#actDetailCurByCount").text(curBuyCount);
+            hideLoading("#selDates")
         }
         async function getTicketCount(id) {
             if (!id) return "";
@@ -212,6 +260,7 @@
     <script>
         async function 查詢購物車() {
             goPanelId("#cart");
+            showloading("#cart");
             const $gvBody = $("#gvCartBody");
             const datas = await getCartList();
             $gvBody.empty();
@@ -231,6 +280,7 @@
                         `);
                 $gvBody.append($tr);
             });
+            hideLoading("#cart");
         }
         async function getCartList() {
             let data = [];
@@ -268,6 +318,43 @@
         async function postPaid(){
             let data = {};
             data = await apiPost("cart", "postPaid", {});
+            return data;
+        }
+    </script>
+    <!--paids-->
+    <script>
+        async function 查詢付款() {
+            goPanelId("#paids");
+            showloading("#paids");
+            const $gvBody = $("#gvPaidsBody");
+            $gvBody.empty();
+            const datas = await getPaidsList();
+            datas.forEach(function(item) {
+                const id = item.id;
+                const $tr = $(`
+                            <tr>
+                                <td><button onclick="reSendEmail(${id})">ReSend Email</button></th>
+                                <td class="d-none">${id}</td>
+                                <td class="title">${item.title}</td>
+                                <td class="description">${item.description}</td>
+                                <td class="date">${item.date}</td>
+                                <td class="count">${item.count}</td>
+                                <td class="paidDate">${item.payDate}</td>
+                                <td class="isSendEmail">${item.sendEmail}</td>
+                            </tr>
+                `);
+                $gvBody.append($tr);
+            });
+            hideLoading("#paids");
+        }
+        async function getPaidsList() {
+            let data = [];
+            data = await apiGet("paids", "getPaidsList", {});
+            return data;
+        }
+        async function reSendEmail(id) {
+            let data = {};
+            data = await apiPost("paids", "reSendEmail", { id: id });
             return data;
         }
     </script>
