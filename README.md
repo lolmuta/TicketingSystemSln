@@ -1,3 +1,21 @@
+# 畫面展示
+- 登入畫面
+	<img src="login.png" />
+- 建立帳號畫面
+	<img src="createAccount.png" />
+- 查詢活動
+	<img src="act.png" />
+- 加入購物車
+	<img src="cart.png" />
+- 查詢購物車
+	<img src="carelist.png" />
+- 寄信內容
+	<img src="mail.png" />
+- 查詢購買紀錄
+	<img src="paidList.png" />
+- swagger 畫面
+	<img src="swagger.png" />
+
 # 系統架構
 - 使用 asp.net mvc 6開發
 - SPA 前端使用 jquery
@@ -43,5 +61,7 @@
     - Name 姓名
     - Email 信箱
     
+
+
 
 	
