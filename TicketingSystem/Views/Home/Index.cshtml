@@ -17,7 +17,6 @@
 
     .myHover:hover {
         text-decoration: underline;
-        border: 1px solid;
     }
     .mytip{
         background: red;
@@ -70,6 +69,10 @@
         <div id="actDetailCount"></div>
     </div>
     <div>
+        <label class="sub-title">單價</label>
+        <div id="actDetailPrice"></div>
+    </div>
+    <div>
         <label class="sub-title">您的購物車已有數量</label>
         <div id="actDetailCurByCount"></div>
     </div>
@@ -90,6 +93,7 @@
                     <th scope="col" class="d-none"></th>
                     <th scope="col">Title</th>
                     <th scope="col">Description</th>
+                    <th scope="col">價單</th>
                     <th scope="col">Date</th>
                     <th scope="col">number of vailable tickets</th>
                 </tr>
@@ -97,6 +101,9 @@
             <tbody id="gvCartBody">
             </tbody>
         </table>
+    </div>
+    <div>
+        總價: <span id="subTotal"></span>
     </div>
     <div>
         <button type="button" onclick="查詢購物車();">查詢購物車</button>
@@ -146,9 +153,7 @@
             goPanelId("#actList");
             await 查詢活動();
             addLink("查詢活動", "查詢活動();");
-            addLink("查詢購物車", "查詢購物車();");
-            addLink(`查詢購物車 <span id="cart-count" class="mytip"></span>
-                `, "查詢購物車();");
+            addLink(`查詢購物車 <span id="cart-count" class="mytip"></span>`, "查詢購物車();");
             addLink("查詢付款", "查詢付款();");
             updateCartCount();
         });
@@ -235,6 +240,10 @@
 
             const curBuyCount = await getCurBuyCount(id);
             $("#actDetailCurByCount").text(curBuyCount);
+
+            //取得單價，購物車數量
+            const price = await getTicketPrice(id);
+            $("#actDetailPrice").text(price);
             hideLoading("#selDates")
         }
         async function getTicketCount(id) {
@@ -273,6 +282,13 @@
             data = await apiGet("cart", "getCurBuyCount", { id: id});
             return data;
         }
+        async function getTicketPrice(id){
+            if (!id) return "";
+
+            let data;
+            data = await apiGet("act", "getTicketPrice", { id: id});
+            return data;
+        }
     </script>
     <!--cart-->
     <script>
@@ -282,6 +298,7 @@
             const $gvBody = $("#gvCartBody");
             const datas = await getCartList();
             $gvBody.empty();
+            let curTotal = 0;
             datas.forEach(function(item) {
                 const id = item.id;
                 const $tr = $(`
@@ -292,12 +309,16 @@
                                 <td scope="col" class="id d-none">${id}</td>
                                 <td class="title">${item.title}</td>
                                 <td class="description">${item.description}</td>
+                                <td class="count">${item.price}</td>
                                 <td class="date">${item.date}</td>
                                 <td class="count">${item.count}</td>
                             </tr>
                         `);
                 $gvBody.append($tr);
+
+                curTotal += item.count * item.price;
             });
+            $("#subTotal").text(curTotal);
             hideLoading("#cart");
         }
         async function getCartList() {

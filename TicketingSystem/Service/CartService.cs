@@ -128,6 +128,7 @@ namespace TicketingSystem.Service
 	                    , [Acts].description
 	                    , format([Acts_Date].date, 'yyyy/MM/dd HH:mm') as date
 	                    ,[TempCart].Count
+                        , Acts_Date.price
                     from 
 	                    [TempCart]
                     join [Acts_Date] on [Acts_Date].ID = [TempCart].Acts_Date_ID

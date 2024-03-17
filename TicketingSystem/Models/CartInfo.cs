@@ -7,5 +7,6 @@
         public string description { get; set; }
         public string date { get; set; }
         public int count { get; set; }
+        public decimal price { get; set; }
     }
 }

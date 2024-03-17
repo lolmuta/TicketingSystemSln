@@ -61,7 +61,16 @@ namespace TicketingSystem.ApiControllers
         {
             return actService.GetTicketCount(id);
         }
-
+        /// <summary>
+        /// 取得場次票的單價
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("getTicketPrice")]
+        public decimal GetTicketPrice(int id)
+        {
+            return actService.GetTicketPrice(id);
+        }
     }
 
 }

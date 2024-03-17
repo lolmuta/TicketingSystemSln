@@ -89,6 +89,14 @@ namespace TicketingSystem.Repo
             });
         }
 
+        internal decimal GetTicketPrice(int id)
+        {
+            return dbHelper.ConnDb(conn =>
+            {
+                return conn.ExecuteScalar<decimal>("select Price from Acts_Date where ID=@id", new { id });
+            });
+        }
+
         internal ActDetail GetActDetail(int id)
         {
             return dbHelper.ConnDb(conn =>
