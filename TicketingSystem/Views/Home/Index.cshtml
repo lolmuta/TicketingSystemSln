@@ -10,6 +10,21 @@
     .sub-title{
         color: blue;
     }
+    .myHover {
+        text-decoration: none;
+        transition: text-decoration 0.3s ease-in-out, border 0.3s ease-in-out;
+    }
+
+    .myHover:hover {
+        text-decoration: underline;
+        border: 1px solid;
+    }
+    .mytip{
+        background: red;
+        color: white;
+        /*padding: 2px;*/
+        font-size: small;
+    }
 </style>
 <div id="loading" class="d-flex align-items-center d-none">
     <strong>Loading...</strong>
@@ -33,7 +48,7 @@
     </div>
     <div>
         <button type="button" onclick="查詢活動();">查詢活動</button>
-        <button type="button" onclick="查詢購物車();">查詢購物車</button>
+        @*<button type="button" onclick="查詢購物車();">查詢購物車</button>*@
     </div>
 </div>
 <div id="actDetail" class="d-none">
@@ -42,7 +57,7 @@
         <div id="actDetailTitle"></div>
     </div>
     <div>
-        <label>Description</label>
+        <label class="sub-title">Description</label>
         <div id="actDetailDescription"></div>
     </div>
     <div>
@@ -71,7 +86,7 @@
         <table class="table" id="gvCart">
             <thead>
                 <tr>
-                     <th scope="col">#</th>
+                    <th scope="col">#</th>
                     <th scope="col" class="d-none"></th>
                     <th scope="col">Title</th>
                     <th scope="col">Description</th>
@@ -88,7 +103,7 @@
         <button type="button" onclick="結帳();">結帳</button>
     </div>
 </div>
-<!--todo 付款清單-->
+<!--付款清單-->
 <div id="paids" class="d-none">
     <div>
         <table class="table" id="gvPaids">
@@ -98,8 +113,7 @@
                     <th scope="col" class="d-none"></th>
                     <th scope="col">Title</th>
                     <th scope="col">Description</th>
-                    <th scope="col">Date</th>
-                    <th scope="col">number of vailable tickets</th>
+                    <th scope="col">Dates</th>
                     <th scope="col">paidDate</th>
                     <th scope="col">isSendEmail</th>
                 </tr>
@@ -133,7 +147,10 @@
             await 查詢活動();
             addLink("查詢活動", "查詢活動();");
             addLink("查詢購物車", "查詢購物車();");
+            addLink(`查詢購物車 <span id="cart-count" class="mytip"></span>
+                `, "查詢購物車();");
             addLink("查詢付款", "查詢付款();");
+            updateCartCount();
         });
 
         function fn_showLoading(loadingElement, contentElement) {
@@ -166,12 +183,12 @@
                 const dates = item.dates.replace(/,/g, '<br>');
                 const id = item.id;
                 const $tr = $(`
-                            <tr onclick="fillDetail(${id});">
-                            <th scope="col" class="rowNumber">${item.rowNumber}</th>
-                            <th scope="col" class="id d-none">${id}</th>
-                            <td class="title">${item.title}</th>
-                            <th class="description">${item.description}</th>
-                            <th class="dates">${dates}</th>
+                            <tr class="myHover" onclick="fillDetail(${id});">
+                                <th scope="col" class="rowNumber">${item.rowNumber}</th>
+                                <th scope="col" class="id d-none">${id}</th>
+                                <td class="title">${item.title}</th>
+                                <th class="description">${item.description}</th>
+                                <th class="dates">${dates}</th>
                             </tr>
                         `);
                 $gvBody.append($tr);
@@ -241,6 +258,7 @@
                 return;
             }
             alert("成功加入購物車");
+            await updateCartCount();
             await 查詢活動();
         }
         async function postAddToTempCart(id, count) {
@@ -298,6 +316,7 @@
             }
 
             alert("delete 成功");
+            await updateCartCount();
             await 查詢購物車();
         }
         async function postDeleteCart(id) {
@@ -314,11 +333,21 @@
             }
 
             alert("結帳成功，已將購買票卷寄到您的信箱");
+            await updateCartCount();
         }
         async function postPaid(){
             let data = {};
             data = await apiPost("cart", "postPaid", {});
             return data;
+        }
+        async function updateCartCount(){
+            const datas = await getCartList();
+            var s = datas.length;
+            if(s==0){
+                $("#cart-count").text("");
+            }else{
+                $("#cart-count").text(s);
+            }
         }
     </script>
     <!--paids-->
@@ -331,16 +360,21 @@
             const datas = await getPaidsList();
             datas.forEach(function(item) {
                 const id = item.id;
+                const dates = item.dates.replace(/,/g, '<br>');
+                const sendEmail = 
+                    item.sendEmail === 0 ? '未寄信' 
+                    : item.sendEmail === 1 ? '已寄信' 
+                    : '未知';
+
                 const $tr = $(`
                             <tr>
-                                <td><button onclick="reSendEmail(${id})">ReSend Email</button></th>
+                                <td><button onclick="reSendEmail(${id});" class="btn btn-secondary">重新寄信</button></th>
                                 <td class="d-none">${id}</td>
                                 <td class="title">${item.title}</td>
                                 <td class="description">${item.description}</td>
-                                <td class="date">${item.date}</td>
-                                <td class="count">${item.count}</td>
+                                <td class="dates">${dates}</td>
                                 <td class="paidDate">${item.payDate}</td>
-                                <td class="isSendEmail">${item.sendEmail}</td>
+                                <td class="isSendEmail">${sendEmail}</td>
                             </tr>
                 `);
                 $gvBody.append($tr);
@@ -355,6 +389,13 @@
         async function reSendEmail(id) {
             let data = {};
             data = await apiPost("paids", "reSendEmail", { id: id });
+            if(data.success){
+                alert("已重新寄信，請等一下再查信箱，是否有寄信");
+                查詢付款();
+                return;
+            }else{
+                alert("發生錯誤 " + data.message);
+            }
             return data;
         }
     </script>

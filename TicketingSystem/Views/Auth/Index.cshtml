@@ -161,4 +161,14 @@
             // 可以添加錯誤處理邏輯
         }
     }
+    $('#userId').keypress(async function(event) {
+        if (event.keyCode === 13) { // 13 是 Enter 键的键码
+            await 登入();
+        }
+    });
+    $('#userPwd').keypress(async function(event) {
+        if (event.keyCode === 13) { // 13 是 Enter 键的键码
+            await 登入();
+        }
+    });
 </script>
